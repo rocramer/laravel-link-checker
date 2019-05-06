@@ -20,7 +20,12 @@ class LogBrokenLinks extends BaseReporter
      */
     public function finishedCrawling()
     {
-        $this->log->info('link checker summary');
+        $count = 0;
+
+        foreach ($this->urlsGroupedByStatusCode as $elements)
+            $count += count($elements);
+
+        $this->log->info('Link checker summary: ' . $count . ' checked URLs.');
 
         collect($this->urlsGroupedByStatusCode)
             ->each(function ($urls, $statusCode) {
@@ -43,15 +48,16 @@ class LogBrokenLinks extends BaseReporter
     /**
      * Called when the crawler had a problem crawling the given url.
      *
-     * @param \Psr\Http\Message\UriInterface         $url
+     * @param \Psr\Http\Message\UriInterface $url
      * @param \GuzzleHttp\Exception\RequestException $requestException
-     * @param \Psr\Http\Message\UriInterface|null    $foundOnUrl
+     * @param \Psr\Http\Message\UriInterface|null $foundOnUrl
      */
     public function crawlFailed(
         UriInterface $url,
         RequestException $requestException,
         ?UriInterface $foundOnUrl = null
-    ) {
+    )
+    {
         parent::crawlFailed($url, $requestException, $foundOnUrl);
 
         $statusCode = $requestException->getCode();
@@ -69,7 +75,8 @@ class LogBrokenLinks extends BaseReporter
         UriInterface $url,
         RequestException $requestException,
         ?UriInterface $foundOnUrl = null
-    ): string {
+    ): string
+    {
         $statusCode = $requestException->getCode();
 
         $reason = $requestException->getMessage();
